@@ -4,4 +4,3 @@ lib
 .Python
 .envrc
 __pycache__
-env/
