@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Club Points Board</title>
+  </head>
+  <body>
+    <h1>Club Points Board</h1>
+    <table border="1">
+      <tr>
+        <th>Club Name</th>
+        <th>Points</th>
+      </tr>
+      {% for club in clubs %}
+      <tr>
+        <td>{{ club.name }}</td>
+        <td>{{ club.points }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="{{ url_for('index') }}">Back to Home</a>
+  </body>
+</html>
