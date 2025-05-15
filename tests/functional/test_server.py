@@ -27,8 +27,3 @@ def test_points_board_displays_clubs_and_points(client, monkeypatch):
     assert 'Test Club B' in html
     assert '30' in html
 
-#a mettre dans tests unitaires
-def test_points_board_route(client):
-    response = client.get('/points-board')
-    assert response.status_code == 200
-    assert b"Club Points Board" in response.data
