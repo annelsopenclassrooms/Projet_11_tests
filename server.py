@@ -1,6 +1,9 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
+reservations = {}
+print("test")
+
 
 def loadClubs():
     with open('clubs.json') as c:
@@ -48,21 +51,34 @@ def book(competition,club):
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
+
     competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
     club = next((c for c in clubs if c['name'] == request.form['club']), None)
     placesRequired = int(request.form['places'])
+    
+    # Initialiser les réservations
+    club_name = club['name']
 
-    if placesRequired > int(club['points']):
-        flash("You cannot redeem more points than you have.")
+    if club_name not in reservations:
+        reservations[club_name] = {}
 
+    club_reservations = reservations[club_name]
 
-    elif placesRequired > int(competition['numberOfPlaces']):
-        flash("Not enough places left in this competition.")
+    if competition['name'] in club_reservations:
+        already_booked = club_reservations[competition['name']]
+    else:
+        already_booked = 0
+    
+    print(f"already_booked: {already_booked}")
+    if placesRequired + already_booked > 12:
+        #print(f"already_booked: {already_booked}")
+        flash("You cannot book more than 12 places in total for this competition.")
     
     else:
-        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-
-        flash('Great - booking complete!')
+        flash('Great-booking complete!')
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+        club['points'] = int(club['points']) - placesRequired
+        club_reservations[competition['name']] = already_booked + placesRequired
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
