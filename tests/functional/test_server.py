@@ -117,7 +117,7 @@ def test_purchase_valid_places(client, test_data):
     }, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Great-booking complete!" in response.data
+    assert b"Great - booking complete!" in response.data
 
 def test_purchase_over_limit(client, test_data):
     response = client.post('/purchasePlaces', data={
@@ -146,6 +146,7 @@ def test_purchase_accumulated_limit(client, test_data):
 
     assert response.status_code == 200
     assert b"You cannot book more than 12 places in total for this competition." in response.data
+
 @pytest.fixture
 def past_test_data(monkeypatch):
     monkeypatch.setattr('server.clubs', [test_club.copy()])
