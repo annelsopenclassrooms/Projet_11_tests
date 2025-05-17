@@ -3,6 +3,10 @@ import pytest
 from server import app
 import server
 
+import pytest
+from flask import Flask
+from server import app as flask_app
+
 @pytest.fixture(autouse=True)
 def clear_reservations():
     server.reservations.clear()
@@ -185,3 +189,30 @@ def test_purchase_places_deducts_points(client, monkeypatch):
     assert response.status_code == 200
     assert int(test_clubs[0]['points']) == 7  # 10 - 3
     assert int(test_competitions[0]['numberOfPlaces']) == 17  # 20 - 3
+
+
+@pytest.fixture
+def client():
+    flask_app.config['TESTING'] = True
+    with flask_app.test_client() as client:
+        yield client
+        
+
+
+def test_points_board_displays_clubs_and_points(client, monkeypatch):
+    test_clubs = [
+        {'name': 'Test Club A', 'email': 'a@test.com', 'points': '15'},
+        {'name': 'Test Club B', 'email': 'b@test.com', 'points': '30'}
+    ]
+
+    monkeypatch.setattr('server.clubs', test_clubs)
+
+    response = client.get('/points-board')
+    html = response.data.decode()
+
+    assert response.status_code == 200
+    assert 'Test Club A' in html
+    assert '15' in html
+    assert 'Test Club B' in html
+    assert '30' in html
+
