@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import pytest
 from server import app
 import server
@@ -9,6 +10,13 @@ def clear_reservations():
 # Données de test (utilisées avec monkeypatch)
 test_club = {'name': 'Test Club', 'email': 'test@club.com', 'points': '30'}
 test_competition = {'name': 'Test Competition', 'date': '2025-10-10 10:00:00', 'numberOfPlaces': '25'}
+# Données de test
+test_club = {'name': 'Test Club', 'email': 'test@club.com', 'points': '30'}
+past_competition = {
+    'name': 'Past Competition',
+    'date': (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
+    'numberOfPlaces': '10'
+}
 
 @pytest.fixture
 def client():
@@ -61,8 +69,6 @@ def test_successful_booking(monkeypatch, client):
 
     assert b"Great - booking complete!" in response.data
     assert test_competition['numberOfPlaces'] == 5  # Mise à jour bien faite
-import pytest
-from server import app  # L'import reste le même si server.py est à la racine
 
 
 
@@ -136,3 +142,23 @@ def test_purchase_accumulated_limit(client, test_data):
 
     assert response.status_code == 200
     assert b"You cannot book more than 12 places in total for this competition." in response.data
+@pytest.fixture
+def past_test_data(monkeypatch):
+    monkeypatch.setattr('server.clubs', [test_club.copy()])
+    monkeypatch.setattr('server.competitions', [past_competition.copy()])
+
+def test_cannot_book_past_competition(client, past_test_data):
+    response = client.get(f"/book/{past_competition['name']}/{test_club['name']}", follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b"This competition has already taken place" in response.data
+
+def test_cannot_purchase_places_for_past_competition(client, past_test_data):
+    response = client.post('/purchasePlaces', data={
+        'club': 'Test Club',
+        'competition': 'Past Competition',
+        'places': '2'
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b"Cannot book places for a past competition." in response.data
