@@ -66,6 +66,12 @@ def purchasePlaces():
         return render_template('welcome.html', club=club, competitions=competitions)
 
     placesRequired = int(request.form['places'])
+
+ 
+    if placesRequired <= 0:
+        flash("Number of places must be a positive number.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
     club_name = club['name']
 
     if club_name not in reservations:

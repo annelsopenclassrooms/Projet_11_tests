@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pytest
-from server import app
+from server import app, competitions, clubs
 import server
 
 import pytest
@@ -168,11 +168,6 @@ def test_cannot_purchase_places_for_past_competition(client, past_test_data):
     assert response.status_code == 200
     assert b"Cannot book places for a past competition." in response.data
 
-@pytest.fixture
-def client():
-    flask_app.config['TESTING'] = True
-    with flask_app.test_client() as client:
-        yield client
 
 def test_purchase_places_deducts_points(client, monkeypatch):
     test_clubs = [{'name': 'Test Club', 'email': 'test@club.com', 'points': '10'}]
@@ -190,15 +185,7 @@ def test_purchase_places_deducts_points(client, monkeypatch):
     assert response.status_code == 200
     assert int(test_clubs[0]['points']) == 7  # 10 - 3
     assert int(test_competitions[0]['numberOfPlaces']) == 17  # 20 - 3
-
-
-@pytest.fixture
-def client():
-    flask_app.config['TESTING'] = True
-    with flask_app.test_client() as client:
-        yield client
-        
-
+ 
 
 def test_points_board_displays_clubs_and_points(client, monkeypatch):
     test_clubs = [
@@ -217,3 +204,27 @@ def test_points_board_displays_clubs_and_points(client, monkeypatch):
     assert 'Test Club B' in html
     assert '30' in html
 
+
+def test_invalid_places_input(monkeypatch, client):
+    # Setup test data
+    test_club = {'name': 'Test Club', 'email': 'test@club.com', 'points': '30'}
+    test_competition = {'name': 'Test Competition', 'date': '2025-10-10 10:00:00', 'numberOfPlaces': '25'}
+    
+    monkeypatch.setattr('server.clubs', [test_club])
+    monkeypatch.setattr('server.competitions', [test_competition])
+
+    # Case 1: negative number
+    response = client.post('/purchasePlaces', data={
+        'competition': 'Test Competition',
+        'club': 'Test Club',
+        'places': '-5'
+    }, follow_redirects=True)
+    assert b"Number of places must be a positive number." in response.data
+
+    # Case 2: zero
+    response = client.post('/purchasePlaces', data={
+        'competition': 'Test Competition',
+        'club': 'Test Club',
+        'places': '0'
+    }, follow_redirects=True)
+    assert b"Number of places must be a positive number." in response.data
