@@ -1,19 +1,22 @@
 import json
-from flask import Flask,render_template,request,redirect,flash,url_for
+from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime
 
 reservations = {}
 print("test")
+
 
 def loadClubs():
     with open('clubs.json') as c:
         listOfClubs = json.load(c)['clubs']
         return listOfClubs
 
+
 def loadCompetitions():
     with open('competitions.json') as comps:
         listOfCompetitions = json.load(comps)['competitions']
         return listOfCompetitions
+
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
@@ -21,9 +24,11 @@ app.secret_key = 'something_special'
 clubs = loadClubs()
 competitions = loadCompetitions()
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
@@ -35,6 +40,7 @@ def showSummary():
         return redirect(url_for('index'))
 
     return render_template('welcome.html', club=club, competitions=competitions)
+
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
@@ -50,7 +56,8 @@ def book(competition, club):
     else:
         flash("Something went wrong - please try again.")
         return render_template('welcome.html', club=foundClub, competitions=competitions)
-    
+
+
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
@@ -67,11 +74,10 @@ def purchasePlaces():
 
     placesRequired = int(request.form['places'])
 
- 
     if placesRequired <= 0:
         flash("Number of places must be a positive number.")
         return render_template('welcome.html', club=club, competitions=competitions)
-    
+
     club_name = club['name']
 
     if club_name not in reservations:
@@ -95,11 +101,13 @@ def purchasePlaces():
 
     return render_template('welcome.html', club=club, competitions=competitions)
 
+
 @app.route('/points-board')
 def points_board():
     return render_template('points_board.html', clubs=clubs)
 
+
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
-    
+

@@ -2,6 +2,7 @@ from locust import HttpUser, task, between
 import json
 from datetime import datetime
 
+
 class WebsiteUser(HttpUser):
     wait_time = between(1, 3)
     host = "http://127.0.0.1:5000"
@@ -26,16 +27,16 @@ class WebsiteUser(HttpUser):
 
     @task
     def login_and_book(self):
-        # Étape 1 : login
+        # Step 1 : login
         with self.client.post("/showSummary", data={"email": self.club["email"]}, catch_response=True) as response:
             if "Welcome" not in response.text:
                 response.failure("Login failed")
                 return
 
-        # Étape 2 : accéder à la page de réservation
+        # Step 2: Access the booking page
         self.client.get(f"/book/{self.competition['name']}/{self.club['name']}")
 
-        # Étape 3 : réserver des places
+        # Step 3 : book the places
         self.client.post("/purchasePlaces", data={
             "competition": self.competition["name"],
             "club": self.club["name"],
