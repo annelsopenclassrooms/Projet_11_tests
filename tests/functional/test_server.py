@@ -1,12 +1,13 @@
 import pytest
-from flask import Flask
-from server import app as flask_app  # Assurez-vous que le fichier s'appelle `server.py`
+from server import app as flask_app
+
 
 @pytest.fixture
 def client():
     flask_app.config['TESTING'] = True
     with flask_app.test_client() as client:
         yield client
+
 
 def test_purchase_places_deducts_points(client, monkeypatch):
     test_clubs = [{'name': 'Test Club', 'email': 'test@club.com', 'points': '10'}]
