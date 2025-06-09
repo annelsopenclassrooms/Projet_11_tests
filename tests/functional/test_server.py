@@ -1,10 +1,12 @@
 from server import app
 import pytest
 
+
 @pytest.fixture
 def client():
     with app.test_client() as client:
         yield client
+
 
 def test_redeem_more_than_points(monkeypatch, client):
     test_club = {'name': 'Test Club', 'email': 'test@club.com', 'points': '2'}
@@ -21,6 +23,7 @@ def test_redeem_more_than_points(monkeypatch, client):
 
     assert b"You cannot redeem more points than you have." in response.data
 
+
 def test_redeem_more_than_available_places(monkeypatch, client):
     test_club = {'name': 'Test Club', 'email': 'test@club.com', 'points': '20'}
     test_competition = {'name': 'Test Comp', 'date': '2025-12-01 10:00:00', 'numberOfPlaces': '3'}
@@ -35,6 +38,7 @@ def test_redeem_more_than_available_places(monkeypatch, client):
     })
 
     assert b"Not enough places left in this competition." in response.data
+
 
 def test_successful_booking(monkeypatch, client):
     test_club = {'name': 'Test Club', 'email': 'test@club.com', 'points': '10'}
