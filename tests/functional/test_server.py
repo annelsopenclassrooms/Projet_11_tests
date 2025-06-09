@@ -1,11 +1,13 @@
 import pytest
-from server import app  # L'import reste le même si server.py est à la racine
+from server import app
+
 
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
+
 
 def test_show_summary_with_monkeypatch(client, monkeypatch):
     fake_clubs = [
@@ -22,6 +24,7 @@ def test_show_summary_with_monkeypatch(client, monkeypatch):
     assert response.status_code == 200
     assert b"admin@irontemple.com" in response.data
     assert b"Spring Festival" in response.data
+
 
 def test_show_summary_invalid_email_with_monkeypatch(client, monkeypatch):
     fake_clubs = [
