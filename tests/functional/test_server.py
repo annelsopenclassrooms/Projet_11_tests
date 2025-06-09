@@ -1,13 +1,13 @@
 import pytest
 from flask import Flask
-from server import app as flask_app  # Assurez-vous que le fichier s'appelle `server.py`
+from server import app as flask_app
+
 
 @pytest.fixture
 def client():
     flask_app.config['TESTING'] = True
     with flask_app.test_client() as client:
         yield client
-        
 
 
 def test_points_board_displays_clubs_and_points(client, monkeypatch):
@@ -26,4 +26,5 @@ def test_points_board_displays_clubs_and_points(client, monkeypatch):
     assert '15' in html
     assert 'Test Club B' in html
     assert '30' in html
+
 

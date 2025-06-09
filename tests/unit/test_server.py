@@ -1,6 +1,7 @@
 import pytest
 from flask import Flask
-from server import app as flask_app  # Assurez-vous que le fichier s'appelle `server.py`
+from server import app as flask_app
+
 
 def test_points_board_route(client):
     response = client.get('/points-board')
